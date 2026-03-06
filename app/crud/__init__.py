@@ -1,0 +1,1 @@
+"""CRUD command and query."""

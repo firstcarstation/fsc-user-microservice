@@ -1,0 +1,1 @@
+"""fsc-user-microservice application."""
