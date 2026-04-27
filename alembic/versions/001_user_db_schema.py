@@ -27,6 +27,9 @@ def upgrade() -> None:
         name="role_type_enum", create_type=True
     )
     role_type_enum.create(op.get_bind(), checkfirst=True)
+    # Prevent SQLAlchemy from attempting to CREATE TYPE again during table creation.
+    user_status_enum.create_type = False
+    role_type_enum.create_type = False
 
     op.create_table(
         "addresses",

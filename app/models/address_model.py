@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, String, Text
+from sqlalchemy import Column, Float, String, Text
 from sqlalchemy.sql import func
 from sqlalchemy.types import DateTime
 
@@ -16,5 +16,9 @@ class Address(Base):
     city = Column(Text, nullable=False)
     zip_code = Column(String(10), nullable=False)
     address_type = Column(Text, nullable=False)
+    # Optional geo fields (used as default pickup coordinates / map pin-drop)
+    lat = Column(Float, nullable=True)
+    lng = Column(Float, nullable=True)
+    place_id = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
     updated_at = Column(DateTime(timezone=True), nullable=True, onupdate=func.now())

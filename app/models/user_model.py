@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, Enum as SAEnum, ForeignKey, String, Text
+from sqlalchemy import Boolean, Column, Enum as SAEnum, ForeignKey, String, Text
 from sqlalchemy.sql import func
 from sqlalchemy.types import DateTime
 
@@ -15,8 +15,18 @@ class User(Base):
     mobile_no = Column(String(15), unique=True, nullable=False)
     role_id = Column(String(36), ForeignKey("roles.role_id", ondelete="RESTRICT"), nullable=False)
     city = Column(Text, nullable=False)
-    status = Column(SAEnum(UserStatusEnum, name="user_status_enum"), nullable=False, default=UserStatusEnum.ACTIVE)
+    status = Column(
+        SAEnum(
+            UserStatusEnum,
+            name="user_status_enum",
+            values_callable=lambda e: [m.value for m in e],  # store lowercase values in DB enum
+        ),
+        nullable=False,
+        default=UserStatusEnum.ACTIVE,
+    )
     hub_id = Column(String(36), ForeignKey("hubs.hub_id", ondelete="SET NULL"), nullable=True)
+    # Recovery agents: when false, agent is off shift (not accepting new work).
+    recovery_on_duty = Column(Boolean, nullable=False, default=False)
     password_hash = Column(String(255), nullable=True)  # added per requirement
     created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
     updated_at = Column(DateTime(timezone=True), nullable=True, onupdate=func.now())

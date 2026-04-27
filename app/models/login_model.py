@@ -10,7 +10,7 @@ class Login(Base):
     __tablename__ = "logins"
 
     login_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    user_id = Column(String(36), ForeignKey("users.user_id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(String(128), ForeignKey("users.user_id", ondelete="CASCADE"), nullable=False)
     login_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
     refresh_token = Column(Text, nullable=True)
     firebase_uid = Column(String(128), nullable=True)
