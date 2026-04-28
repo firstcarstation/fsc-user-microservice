@@ -191,15 +191,32 @@ def update_profile(db: Session, payload: UpdateProfileRequest, ctx: AuthContext)
 
     if payload.saved_addresses is not None:
         person.saved_addresses = [b.model_dump(exclude_none=True) for b in payload.saved_addresses]
+        # No saved rows => no meaningful default index (avoids idx>=len validation errors).
+        if len(payload.saved_addresses) == 0:
+            person.saved_addresses_default_index = None
 
     if payload.saved_addresses_default_index is not None:
         # Persist customer’s "default" saved address selection server-side.
         idx = payload.saved_addresses_default_index
         if idx < 0:
             raise AppException("Invalid saved_addresses_default_index", status_code=400)
-        if payload.saved_addresses is not None and idx >= len(payload.saved_addresses):
-            raise AppException("Invalid saved_addresses_default_index", status_code=400)
-        person.saved_addresses_default_index = idx
+        if payload.saved_addresses is not None:
+            if len(payload.saved_addresses) == 0:
+                person.saved_addresses_default_index = None
+            elif idx >= len(payload.saved_addresses):
+                raise AppException("Invalid saved_addresses_default_index", status_code=400)
+            else:
+                person.saved_addresses_default_index = idx
+        else:
+            # Partial update: validate against already-stored JSON list.
+            raw = getattr(person, "saved_addresses", None) or []
+            n = len(raw) if isinstance(raw, list) else 0
+            if n == 0:
+                person.saved_addresses_default_index = None
+            elif idx >= n:
+                raise AppException("Invalid saved_addresses_default_index", status_code=400)
+            else:
+                person.saved_addresses_default_index = idx
 
     if (
         payload.company_name is not None
